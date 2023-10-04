@@ -44,10 +44,10 @@ int main(int argc, char **argv) {
   st = rnnoise_create(NULL);
   /* f1 = fopen(argv[1], "rb");
   fout = fopen(argv[2], "wb"); */
-  
-  
-  if ((argc < 3) || (argc >5)) {
-    fprintf(stderr, "usage: %s <noisy speech> <output denoised> [<ffmpeg codec parameters>] [<ffmpeg input filter>]\n", argv[0]);
+
+
+  if ((argc < 3) || (argc >6)) {
+    fprintf(stderr, "usage: %s <noisy speech> <output denoised> [<ffmpeg output filters, codec, and format parameters>] [<ffmpeg input filter parameters>] [<ffmpeg input format parameters>]\n", argv[0]);
     return 1;
   }
   if (strlen(argv[1]) > MAX_PATH_LENGTH) {
@@ -68,19 +68,28 @@ int main(int argc, char **argv) {
   } else {
       sprintf(outcommand, "ffmpeg -y -f s16le -ar 44100 -ac 1 -i - '%s'", argv[2]);
   }
-  if (argc == 5) {
+  if (argc >= 5) {
     if (strlen(argv[4]) > MAX_PATH_LENGTH) {
         printf("Found input filter\n");
         fprintf(stderr, "Length of input filter greater than maxiumum %d chars>\n",MAX_PATH_LENGTH);
         return 1;
     }
-    sprintf(incommand, "ffmpeg -i '%s' -filter:a %s -f s16le -ar 44100 -ac 1 -", argv[1], argv[4]);
+    if (argc >= 6) {
+        if (strlen(argv[5]) > MAX_PATH_LENGTH) {
+            printf("Found input format\n");
+            fprintf(stderr, "Length of input format greater than maxiumum %d chars>\n",MAX_PATH_LENGTH);
+            return 1;
+        }
+        sprintf(incommand, "ffmpeg %s -i '%s' %s -f s16le -ar 44100 -ac 1 -", argv[5], argv[1], argv[4]);
+    } else {
+        sprintf(incommand, "ffmpeg -i '%s' %s -f s16le -ar 44100 -ac 1 -", argv[1], argv[4]);
+    }
   } else {
     sprintf(incommand, "ffmpeg -i '%s' -f s16le -ar 44100 -ac 1 -", argv[1]);
   }
-  
-  /*sprintf(incommand, "sox '%s' -t raw -r 44.1k -e signed -b 16 -c 1 -", argv[1]);
-  sprintf(outcommand, "sox -t raw -r 44.1k -e signed -b 16 -c 1 '%s'", argv[2]);*/
+
+  fprintf(stderr, "Running: %s | rnnoise | %s\n", incommand, outcommand);
+
   f1 = popen(incommand, "r");
   fout = popen(outcommand, "w");
   while (1) {
