@@ -21,7 +21,7 @@ sudo -u hostuser mkdir -p "$OUTDIR"
 cd "$INDIR"
 IFS=$'/n'
 for i in *.mp3; do
-    [[ "$i" == "*.mp3" ]] && continuell 
+    [[ "$i" == "*.mp3" ]] && continuell
     j="$INDIR/$i"
     [[ -f "$j" ]] || continue
     info=$( mediainfo "$j" )
@@ -57,5 +57,6 @@ for i in *.mp3; do
     mp3gain -r "$j"
     outfile="$OUTDIR/$( echo "$i" | tr -d "[:blank:]" )"
     sudo -u hostuser rnnoise-ffmpeg "$j" "$outfile" \
-        "-filter:a silenceremove=start_periods=1:start_duration=1:start_threshold=-75dB:detection=peak,alimiter=level_out=0.8:limit=0.2:release=200:asc=1:asc_level=0.2 -ac 1 -c:a libmp3lame $codec"
+        "-filter:a alimiter=level_out=0.8:limit=0.2:release=200:asc=1:asc_level=0.2 -ac 1 -c:a libmp3lame $codec" \
+        "-filter:a silenceremove=start_periods=1:start_duration=1:start_threshold=-75dB:detection=peak"
 done
