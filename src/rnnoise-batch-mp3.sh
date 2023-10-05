@@ -21,7 +21,7 @@ sudo -u hostuser mkdir -p "$OUTDIR"
 cd "$INDIR"
 IFS=$'/n'
 for i in *.mp3; do
-    [[ "$i" == "*.mp3" ]] && continuell
+    [[ "$i" == "*.mp3" ]] && continue
     j="$INDIR/$i"
     [[ -f "$j" ]] || continue
     info=$( mediainfo "$j" )
