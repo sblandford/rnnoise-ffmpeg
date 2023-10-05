@@ -27,6 +27,7 @@ RUN apt update -y && apt install -y \
     mp3gain \
     mediainfo \
     ffmpeg \
+    sudo \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /in /out

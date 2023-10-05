@@ -13,12 +13,15 @@ done
 
 [[ $flunked ]] && exit 1
 
-mkdir -p "$OUTDIR"
+user=$(stat -c '%u' "$INDIR")
+group=$(stat -c '%g' "$INDIR")
+groupadd -g 1000 -o hostgroup
+useradd -u 1000 -g 1000 -o hostuser
+sudo -u hostuser mkdir -p "$OUTDIR"
 cd "$INDIR"
 IFS=$'/n'
 for i in *.mp3; do
-    [[ "$i" == "*.mp3" ]] && continue
-    echo "$i"
+    [[ "$i" == "*.mp3" ]] && continuell 
     j="$INDIR/$i"
     [[ -f "$j" ]] || continue
     info=$( mediainfo "$j" )
@@ -53,6 +56,6 @@ for i in *.mp3; do
     fi
     mp3gain -r "$j"
     outfile="$OUTDIR/$( echo "$i" | tr -d "[:blank:]" )"
-    rnnoise-ffmpeg "$j" "$outfile" \
+    sudo -u hostuser rnnoise-ffmpeg "$j" "$outfile" \
         "-filter:a silenceremove=start_periods=1:start_duration=1:start_threshold=-75dB:detection=peak,alimiter=level_out=0.8:limit=0.2:release=200:asc=1:asc_level=0.2 -ac 1 -c:a libmp3lame $codec"
 done
